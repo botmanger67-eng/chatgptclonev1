@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>AI Chat - DeepSeek</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Optional: Add manifest or favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <header class="sidebar-header">
+                <h1 class="app-logo">AI Chat</h1>
+                <button id="new-chat-btn" class="btn btn-primary" title="New conversation">+ New Chat</button>
+            </header>
+            <nav id="conversation-list" class="conversation-list">
+                <!-- Conversations will be dynamically loaded -->
+            </nav>
+            <footer class="sidebar-footer">
+                <button id="toggle-sidebar-btn" class="btn btn-icon" title="Toggle sidebar">☰</button>
+                <button id="settings-btn" class="btn btn-icon" title="Settings">⚙</button>
+            </footer>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main id="chat-area" class="chat-area">
+            <header class="chat-header">
+                <h2 id="current-conversation-title" class="conversation-title">New Chat</h2>
+                <div class="chat-actions">
+                    <button id="clear-chat-btn" class="btn btn-secondary" title="Clear messages" disabled>Clear</button>
+                    <button id="delete-conversation-btn" class="btn btn-danger" title="Delete conversation" disabled>Delete</button>
+                </div>
+            </header>
+
+            <div id="message-container" class="message-container">
+                <!-- Messages will be rendered here -->
+                <div id="welcome-message" class="welcome-message">
+                    <h2>Welcome to AI Chat</h2>
+                    <p>Start a new conversation or choose an existing one from the sidebar.</p>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div id="input-wrapper" class="input-wrapper">
+                    <textarea id="user-input" rows="1" placeholder="Type your message here..." disabled></textarea>
+                    <button id="send-btn" class="btn btn-send" title="Send message" disabled>
+                        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2L2 14v7z"/></svg>
+                    </button>
+                </div>
+                <p class="input-disclaimer">AI may produce inaccurate information. Verify important facts.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hidden template for message rendering -->
+    <template id="message-template">
+        <div class="message {{ 'user' if role == 'user' else 'assistant' }}">
+            <div class="message-avatar">
+                <img src="{{ url_for('static', filename='icons/' + ('user' if role == 'user' else 'bot') + '-avatar.svg') }}" alt="Avatar">
+            </div>
+            <div class="message-content">
+                <div class="message-text"></div>
+                <div class="message-timestamp"></div>
+                <div class="message-actions">
+                    <button class="btn-copy" title="Copy message">📋</button>
+                    <button class="btn-regenerate" title="Regenerate response" disabled>🔄</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Global configuration object -->
+    <script>
+        window.CHAT_CONFIG = {
+            apiEndpoint: "{{ url_for('ai.handle_chat') }}",
+            conversationsEndpoint: "{{ url_for('conversations.list_conversations') }}",
+            csrfToken: "{{ csrf_token() }}",
+            staticUrl: "{{ url_for('static', filename='') }}",
+            maxMessageLength: {{ config.MAX_MESSAGE_LENGTH | default(2000) }},
+            streamingEnabled: {{ config.STREAMING_ENABLED | default('true') | lower }}
+        };
+    </script>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>
